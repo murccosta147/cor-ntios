@@ -1,0 +1,439 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio 1 Coríntios | Estudo Bíblico Avançado</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary: #475569;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Telas */
+        .screen { display: none; padding: 40px; }
+        .screen.active { display: block; animation: fadeIn 0.4s ease-in-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Menu Inicial */
+        .header-title { text-align: center; margin-bottom: 30px; }
+        .header-title h1 { color: var(--primary); font-size: 2.2rem; }
+        .header-title p { color: var(--secondary); margin-top: 10px; }
+
+        .level-btn {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .level-btn:hover { background-color: var(--primary-hover); }
+        .level-btn.btn-l2 { background-color: #0284c7; }
+        .level-btn.btn-l2:hover { background-color: #0369a1; }
+        .level-btn.btn-l3 { background-color: #4338ca; }
+        .level-btn.btn-l3:hover { background-color: #3730a3; }
+
+        /* Quiz */
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: var(--secondary); }
+        .progress-bar-bg { width: 100%; background-color: var(--border); height: 10px; border-radius: 5px; margin-bottom: 30px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.3s ease; }
+
+        .question-text { font-size: 1.3rem; font-weight: 600; margin-bottom: 25px; }
+        
+        .options-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
+        .option-label {
+            padding: 15px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
+        }
+        .option-label:hover { border-color: var(--primary); background-color: #eff6ff; }
+        .option-label input { margin-right: 15px; transform: scale(1.2); }
+
+        .input-text { width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; margin-bottom: 30px; }
+        .input-text:focus { outline: none; border-color: var(--primary); }
+        textarea.input-text { resize: vertical; min-height: 100px; }
+
+        .btn-next { background-color: var(--success); color: white; border: none; padding: 15px 30px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; float: right; transition: background 0.3s;}
+        .btn-next:hover { background-color: #15803d; }
+        .btn-next:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        /* Resultados */
+        .results-header { text-align: center; margin-bottom: 30px; }
+        .score-circle { width: 120px; height: 120px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; margin: 0 auto 20px; }
+        
+        .diagnostic-box { background-color: #fffbeb; border-left: 6px solid #f59e0b; padding: 20px; margin-bottom: 30px; border-radius: 4px; }
+        .diagnostic-box h3 { color: #b45309; margin-bottom: 10px; }
+
+        .review-list { display: flex; flex-direction: column; gap: 15px; }
+        .review-item { padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+        .review-item.correct { border-left: 6px solid var(--success); background-color: #f0fdf4; }
+        .review-item.wrong { border-left: 6px solid var(--danger); background-color: #fef2f2; }
+        .review-q { font-weight: bold; margin-bottom: 8px; }
+        .review-a { font-size: 0.9rem; color: var(--secondary); }
+
+        .btn-restart { width: 100%; background-color: var(--secondary); color: white; padding: 15px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 30px; }
+
+        @media (max-width: 600px) {
+            .screen { padding: 20px; }
+            .header-title h1 { font-size: 1.8rem; }
+            .score-circle { width: 100px; height: 100px; font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="screen-menu" class="screen active">
+        <div class="header-title">
+            <h1>Desafio 1 Coríntios</h1>
+            <p>Selecione seu nível de profundidade teológica</p>
+        </div>
+        <button class="level-btn" onclick="startQuiz(1)">Nível 1: Médio (Fundamentos)</button>
+        <button class="level-btn btn-l2" onclick="startQuiz(2)">Nível 2: Difícil (Contexto e Doutrina)</button>
+        <button class="level-btn btn-l3" onclick="startQuiz(3)">Nível 3: Muito Difícil (Exegese e Detalhes)</button>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <div class="progress-header">
+            <span id="level-indicator">Nível</span>
+            <span id="progress-text">Pergunta 1 de 20</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div id="progress-bar-fill" class="progress-bar-fill"></div>
+        </div>
+
+        <div id="question-container">
+            </div>
+
+        <button id="btn-next" class="btn-next" onclick="nextQuestion()" disabled>Avançar</button>
+        <div style="clear: both;"></div>
+    </div>
+
+    <div id="screen-results" class="screen">
+        <div class="results-header">
+            <h2>Avaliação Concluída</h2>
+            <div class="score-circle" id="score-display">0%</div>
+            <p id="score-text">Você acertou X de 20 questões.</p>
+        </div>
+
+        <div class="diagnostic-box">
+            <h3>🧠 Diagnóstico de Estudo Inteligente</h3>
+            <p id="diagnostic-text">Analisando seu desempenho...</p>
+        </div>
+
+        <h3>Gabarito e Revisão</h3>
+        <div class="review-list" id="review-list">
+            </div>
+
+        <button class="btn-restart" onclick="restartMenu()">Voltar ao Menu Principal</button>
+    </div>
+</div>
+
+<script>
+    // --- BANCO DE DADOS: 60 QUESTÕES ---
+    // t: 'm' (múltipla escolha), 'f' (complete/fill), 'd' (descritiva)
+    // k: palavras-chave para avaliar questões textuais
+    const dbQuestions = [
+        // ======= NÍVEL 1 (MÉDIO) =======
+        { l: 1, c: 1, t: 'm', q: 'Segundo Paulo no capítulo 1, quem lhe informou sobre as divisões na igreja de Corinto?', o: ['Apolo', 'Cefas', 'A família de Cloe', 'Estéfanas'], a: 2 },
+        { l: 1, c: 1, t: 'd', q: 'Qual é o tema central da pregação de Paulo, que é escândalo para os judeus e loucura para os gregos? (Cap. 1)', k: ['cristo', 'crucificado', 'cruz'], a: 'Cristo crucificado.' },
+        { l: 1, c: 2, t: 'f', q: '"Ora, o homem _______ não compreende as coisas do Espírito de Deus..." (Cap. 2)', k: ['natural'], a: 'natural' },
+        { l: 1, c: 3, t: 'm', q: 'Ao falar sobre o crescimento da igreja (Cap. 3), Paulo diz: "Eu plantei, Apolo regou..." Quem deu o crescimento?', o: ['O Espírito Santo', 'Deus', 'A igreja', 'Os apóstolos'], a: 1 },
+        { l: 1, c: 3, t: 'm', q: 'Em 1 Coríntios 3, Paulo afirma que ninguém pode colocar outro fundamento além do que já está posto. Qual é este fundamento?', o: ['A Lei de Moisés', 'A graça', 'Jesus Cristo', 'O amor'], a: 2 },
+        { l: 1, c: 4, t: 'f', q: '"Assim, pois, importam-nos os homens como ministros de Cristo e _______ dos mistérios de Deus." (Cap. 4)', k: ['despenseiros', 'administradores'], a: 'despenseiros (ou administradores)' },
+        { l: 1, c: 5, t: 'm', q: 'Qual era o pecado moral grave relatado no capítulo 5 que a igreja estava tolerando?', o: ['Roubo', 'Idolatria', 'Um homem possuindo a mulher de seu pai', 'Falsos profetas'], a: 2 },
+        { l: 1, c: 6, t: 'm', q: 'No capítulo 6, Paulo repreende os coríntios por levarem seus litígios (processos judiciais) perante quem?', o: ['O imperador', 'Os injustos (tribunais seculares)', 'Os sacerdotes judeus', 'Os anciãos da igreja'], a: 1 },
+        { l: 1, c: 6, t: 'f', q: 'Paulo afirma: "Acaso não sabem que o corpo de vocês é _______ do Espírito Santo..." (Cap. 6)', k: ['santuario', 'templo'], a: 'santuário (ou templo)' },
+        { l: 1, c: 7, t: 'm', q: 'No capítulo 7, sobre o casamento, o que Paulo recomenda aos solteiros e viúvas?', o: ['Que se casem o mais rápido possível', 'Que permaneçam como ele (solteiros), se tiverem o dom', 'Que se isolem da sociedade', 'Que façam voto de silêncio'], a: 1 },
+        { l: 1, c: 8, t: 'm', q: 'No capítulo 8, sobre alimentos sacrificados a ídolos, Paulo afirma: "O conhecimento traz orgulho, mas o..."', o: ['Espírito vivifica', 'Amor edifica', 'Perdão restaura', 'Poder transforma'], a: 1 },
+        { l: 1, c: 9, t: 'm', q: 'Qual era o direito apostólico que Paulo abriu mão, conforme argumenta no capítulo 9?', o: ['De pregar aos gentios', 'De casar-se', 'De receber sustento financeiro da igreja', 'De realizar milagres'], a: 2 },
+        { l: 1, c: 10, t: 'f', q: '"Aquele, pois, que pensa estar em pé, veja que não _______." (Cap. 10)', k: ['caia'], a: 'caia' },
+        { l: 1, c: 11, t: 'd', q: 'Qual o principal propósito da Ceia do Senhor declarado por Paulo no cap 11:26? ("Porque, todas as vezes que comerdes... e beberdes...")', k: ['anunciar', 'morte', 'senhor', 'venha'], a: 'Anunciar a morte do Senhor até que Ele venha.' },
+        { l: 1, c: 12, t: 'm', q: 'No capítulo 12, para ilustrar a diversidade e a unidade dos dons espirituais, Paulo compara a igreja a quê?', o: ['Um rebanho', 'Um exército', 'Um corpo humano', 'Um edifício'], a: 2 },
+        { l: 1, c: 13, t: 'm', q: 'Segundo 1 Coríntios 13, se alguém falar a língua dos homens e dos anjos, mas não tiver amor, será como o quê?', o: ['Um sino que ressoa ou um prato que retine', 'Um profeta mudo', 'Uma árvore sem frutos', 'Um soldado desarmado'], a: 0 },
+        { l: 1, c: 14, t: 'm', q: 'No capítulo 14, qual dom Paulo diz que a igreja deve buscar com zelo especial para edificação de todos?', o: ['Curar enfermos', 'Falar em línguas', 'Profetizar', 'Interpretação'], a: 2 },
+        { l: 1, c: 15, t: 'm', q: 'No capítulo 15, Paulo afirma que se Cristo não ressuscitou, qual é a consequência?', o: ['Apenas a pregação é inútil', 'A fé é vã e ainda estamos em nossos pecados', 'Devemos buscar outro messias', 'A salvação é apenas espiritual'], a: 1 },
+        { l: 1, c: 15, t: 'f', q: '"O último inimigo a ser destruído é a _______." (Cap. 15)', k: ['morte'], a: 'morte' },
+        { l: 1, c: 16, t: 'm', q: 'No último capítulo, o que Paulo instrui que os coríntios façam no primeiro dia da semana?', o: ['Jejuem', 'Separem uma quantia em dinheiro para os santos', 'Realizem batismos', 'Elejam líderes'], a: 1 },
+
+        // ======= NÍVEL 2 (DIFÍCIL) =======
+        { l: 2, c: 1, t: 'm', q: 'Quais dos seguintes nomes Paulo afirma expressamente ter batizado em Corinto? (Cap. 1)', o: ['Timóteo e Tito', 'Apolo e Pedro', 'Crispo, Gaio e a família de Estéfanas', 'Priscila e Áquila'], a: 2 },
+        { l: 2, c: 2, t: 'd', q: 'Em 1 Co 2:16, Paulo cita Isaías perguntando "Quem conheceu a mente do Senhor?". Em seguida, o que ele afirma que nós (os crentes) temos?', k: ['mente', 'cristo'], a: 'Temos a mente de Cristo.' },
+        { l: 2, c: 3, t: 'm', q: 'Paulo diz em 1 Co 3 que a obra de cada um passará por uma prova. Qual elemento revelará a qualidade da obra de cada construtor?', o: ['A água', 'O fogo', 'O vento', 'O tempo'], a: 1 },
+        { l: 2, c: 4, t: 'm', q: 'No capítulo 4, Paulo diz que Deus exibiu os apóstolos em último lugar na procissão. A que ele os compara?', o: ['Aos reis do mundo', 'Aos condenados à morte no espetáculo', 'Aos profetas antigos', 'Aos anjos caídos'], a: 1 },
+        { l: 2, c: 5, t: 'f', q: '"Lancem fora o velho fermento... Pois Cristo, nosso Cordeiro _______, foi sacrificado." (Cap. 5)', k: ['pascoal'], a: 'pascoal' },
+        { l: 2, c: 6, t: 'm', q: 'No capítulo 6, Paulo lista vários pecados que impedem a herança do Reino de Deus. Para concluir o argumento sobre pureza, ele lembra a que preço fomos comprados. O que devemos fazer com nosso corpo?', o: ['Escondê-lo do mundo', 'Glorificar a Deus', 'Jejuar diariamente', 'Castigá-lo'], a: 1 },
+        { l: 2, c: 7, t: 'm', q: 'No capítulo 7, sobre casamentos mistos (crente com descrente), qual é a recomendação de Paulo se o descrente consentir em viver com o crente?', o: ['Deve se separar para não se contaminar', 'O crente não deve abandoná-lo, pois santifica o cônjuge', 'Deve levá-lo ao conselho da igreja', 'Deve orar por 3 anos antes de decidir'], a: 1 },
+        { l: 2, c: 7, t: 'f', q: 'Sobre escravidão e liberdade no cap. 7: "Pois o que era escravo quando foi chamado no Senhor, é _______ do Senhor." (Cap. 7)', k: ['liberto'], a: 'liberto' },
+        { l: 2, c: 8, t: 'm', q: 'Qual foi a atitude pessoal que Paulo propôs em 1 Co 8 para não escandalizar o irmão fraco na questão de comida sacrificada a ídolos?', o: ['Comer apenas vegetais', 'Nunca mais comer carne', 'Proibir a venda de carne em Corinto', 'Comer escondido'], a: 1 },
+        { l: 2, c: 9, t: 'd', q: 'No cap 9, Paulo usa a metáfora de uma corrida. Ele diz esmurrar o próprio corpo e subjugá-lo, para que, depois de pregar aos outros, ele mesmo não venha a ser o quê?', k: ['reprovado', 'desqualificado'], a: 'Reprovado (ou desqualificado).' },
+        { l: 2, c: 10, t: 'm', q: 'Sobre as tentações, o que Paulo garante em 1 Coríntios 10:13?', o: ['Deus removerá todas as provações', 'Não sobreveio tentação que não fosse humana, e Deus dará o escape', 'A tentação é sinal de falta de fé', 'Os anjos lutarão no nosso lugar'], a: 1 },
+        { l: 2, c: 11, t: 'm', q: 'Ao repreender o comportamento dos coríntios na Ceia (Cap 11), qual era a principal falha que ocorria nas reuniões antes da comunhão?', o: ['Cantavam fora do tom', 'Alguns se embriagavam e comiam tudo antes, deixando outros com fome', 'Usavam pão sem fermento incorreto', 'Não lavavam as mãos'], a: 1 },
+        { l: 2, c: 12, t: 'm', q: 'Paulo lista diversos dons em 1 Co 12:8-10. Qual destes NÃO é expressamente listado nesta passagem específica?', o: ['Palavra da sabedoria', 'Dom de curas', 'Dom de hospitalidade', 'Discernimento de espíritos'], a: 2 },
+        { l: 2, c: 13, t: 'm', q: 'No final do capítulo 13, Paulo diz que agora vemos como em um espelho, obscuramente, mas como veremos no futuro?', o: ['Pela luz divina', 'Face a face', 'Pelos olhos dos anjos', 'Em sonhos'], a: 1 },
+        { l: 2, c: 14, t: 'm', q: 'Para Paulo (Cap 14), prefere-se falar cinco palavras com entendimento na igreja do que quantas palavras em outra língua?', o: ['Mil', 'Dez mil', 'Cem mil', 'Sete vezes mais'], a: 1 },
+        { l: 2, c: 14, t: 'f', q: '"Pois Deus não é Deus de _______, mas de paz." (Cap. 14)', k: ['confusao', 'desordem'], a: 'confusão (ou desordem)' },
+        { l: 2, c: 15, t: 'm', q: 'No cap 15, Paulo detalha as aparições de Cristo ressurreto. A quem ele apareceu a mais de quinhentos irmãos de uma só vez, após aparecer a Cefas e aos Doze?', o: ['Antes de aparecer a Tiago', 'Depois da ascensão', 'Apenas no cenáculo', 'Antes de Maria Madalena'], a: 0 },
+        { l: 2, c: 15, t: 'm', q: 'Como Paulo compara os corpos celestiais aos terrestres em 1 Co 15?', o: ['São iguais em aparência', 'Cada um tem o seu próprio esplendor/glória diferente', 'Os terrestres brilham mais', 'Os celestiais não têm forma'], a: 1 },
+        { l: 2, c: 16, t: 'm', q: 'Onde Paulo diz no capítulo 16 que uma "porta ampla e promissora" havia se aberto para ele, apesar dos muitos adversários?', o: ['Macedônia', 'Éfeso', 'Acaia', 'Jerusalém'], a: 1 },
+        { l: 2, c: 16, t: 'f', q: '"Se alguém não ama ao Senhor, seja anátema. _______!" (Termo aramaico do Cap 16)', k: ['maranata'], a: 'Maranata' },
+
+        // ======= NÍVEL 3 (MUITO DIFÍCIL) =======
+        { l: 3, c: 1, t: 'm', q: 'No cap 1, Paulo diz que "Cristo tornou-se para nós sabedoria de Deus". Quais são os outros três termos atrelados a essa sabedoria de Deus no v. 30?', o: ['Justiça, santificação e redenção', 'Amor, paz e alegria', 'Fé, esperança e caridade', 'Graça, misericórdia e perdão'], a: 0 },
+        { l: 3, c: 2, t: 'f', q: 'Como está escrito: "Nem olhos viram, nem ouvidos ouviram, nem jamais penetrou em coração humano o que Deus preparou para aqueles que o _______." (Cap. 2)', k: ['amam'], a: 'amam' },
+        { l: 3, c: 3, t: 'm', q: 'No capítulo 3, ao listar os materiais de construção sobre o fundamento que é Cristo, qual é a ordem exata das pedrarias preciosas?', o: ['Ouro, prata, pedras preciosas', 'Ouro, diamantes, rubis', 'Prata, bronze, ferro', 'Ouro, prata, bronze'], a: 0 },
+        { l: 3, c: 4, t: 'd', q: 'Em 1 Co 4:6, Paulo diz que aplicou essas coisas a si mesmo e a Apolo para que os coríntios aprendam uma regra importante. Qual é essa regra ("Não ultrapasseis o que...")?', k: ['esta', 'escrito'], a: 'Não ultrapasseis o que está escrito (ou "não ir além do que está escrito").' },
+        { l: 3, c: 5, t: 'm', q: 'No cap 5, ao ordenar a disciplina do irmão imoral, Paulo instrui a igreja a "entregar esse homem a Satanás". Qual era o propósito específico disso segundo o texto?', o: ['Para perdição eterna', 'Para a destruição da carne e salvação do espírito no dia do Senhor', 'Para que morresse fisicamente', 'Para ser humilhado perante os gentios'], a: 1 },
+        { l: 3, c: 6, t: 'm', q: 'Em 1 Co 6, Paulo afirma: "Todas as coisas me são lícitas, mas nem todas..." O que completa corretamente a frase DUAS vezes nos versículos 12?', o: ['Convém / Edificam', 'Convém / Me deixarei dominar por nenhuma', 'São boas / Glorificam a Deus', 'Edificam / Trazem paz'], a: 1 },
+        { l: 3, c: 7, t: 'm', q: 'No capítulo 7:25, Paulo fala sobre os celibatários/virgens. O que ele diz sobre a ordem do Senhor a esse respeito?', o: ['Recebeu um mandamento direto para proibir o casamento', 'Ele não tem mandamento do Senhor, mas dá o seu parecer como alguém digno de confiança', 'É uma ordem do Antigo Testamento', 'Cristo ordenou o celibato para os apóstolos'], a: 1 },
+        { l: 3, c: 8, t: 'f', q: '"Pois, ainda que haja também alguns que se chamem deuses... todavia, para nós há um só Deus, o _______, de quem é tudo e para quem nós vivemos." (Cap. 8)', k: ['pai'], a: 'Pai' },
+        { l: 3, c: 9, t: 'm', q: 'No cap 9, Paulo cita a Lei de Moisés para justificar o sustento pastoral: "Não atarás a boca ao boi quando debulha". De qual livro do AT é essa citação?', o: ['Gênesis', 'Levítico', 'Números', 'Deuteronômio'], a: 3 },
+        { l: 3, c: 10, t: 'm', q: 'No cap 10, ao citar a rebeldia de Israel no deserto, Paulo diz que "em um só dia caíram" quantos milhares por causa da imoralidade?', o: ['Três mil', 'Vinte e três mil', 'Cento e quarenta e quatro mil', 'Doze mil'], a: 1 },
+        { l: 3, c: 11, t: 'm', q: 'Qual a justificativa teológica dada em 1 Co 11:10 para a mulher ter "sinal de autoridade" sobre a cabeça?', o: ['Por causa dos anjos', 'Por causa dos maridos', 'Para não ofender os judeus', 'Por ordem do imperador'], a: 0 },
+        { l: 3, c: 12, t: 'd', q: 'No cap 12:28, Paulo estabelece uma ordem de ministérios instituídos por Deus na igreja. "Primeiramente apóstolos, em segundo lugar..." O que vem em segundo e terceiro lugar?', k: ['profetas', 'mestres'], a: 'Em segundo lugar, profetas; em terceiro, mestres.' },
+        { l: 3, c: 14, t: 'm', q: 'Em 1 Co 14, Paulo cita a lei: "Por homens de outras línguas, e por lábios de estrangeiros, falarei a este povo". Essa citação se refere a qual profeta do Antigo Testamento?', o: ['Jeremias', 'Isaías', 'Ezequiel', 'Joel'], a: 1 },
+        { l: 3, c: 15, t: 'm', q: 'No complexo argumento da ressurreição no cap 15, Paulo diz que há diferentes tipos de carne. Quantos tipos de "carne" (físicas) ele diferencia expressamente no v. 39?', o: ['Dois (homens e animais)', 'Três (homens, aves, peixes)', 'Quatro (homens, quadrúpedes, aves, peixes)', 'Nenhum, toda carne é igual'], a: 2 },
+        { l: 3, c: 15, t: 'm', q: 'Em 1 Co 15:45: "O primeiro homem, Adão, tornou-se ser vivente; o último Adão, espírito..."', o: ['Santo', 'Eterno', 'Vivificante', 'Glorificado'], a: 2 },
+        { l: 3, c: 15, t: 'f', q: '"Num momento, num abrir e fechar de olhos, ao ressoar da última _______. Ocorrerá, e os mortos ressuscitarão..." (Cap. 15)', k: ['trombeta'], a: 'trombeta' },
+        { l: 3, c: 16, t: 'm', q: 'Quais três irmãos trouxeram alegria a Paulo porque "supriram a deficiência de vocês" (Coríntios), mencionados no cap 16:17?', o: ['Priscila, Áquila e Apolo', 'Estéfanas, Fortunato e Acaico', 'Tito, Timóteo e Silas', 'Gaio, Crispo e Sóstenes'], a: 1 },
+        { l: 3, c: 16, t: 'm', q: 'Quem Paulo saúda dizendo "as igrejas da Ásia enviam saudações", com menção especial à igreja que se reunia na casa deles? (Cap 16)', o: ['Áquila e Priscila', 'Filemom e Áfia', 'Lídia e o carcereiro', 'Tito e Lucas'], a: 0 },
+        { l: 3, c: 9, t: 'd', q: 'No capítulo 9, como Paulo define sua recompensa ao pregar o evangelho (vs 18)?', k: ['gratuitamente', 'graca', 'custo'], a: 'Oferecer o evangelho gratuitamente (sem custo).' },
+        { l: 3, c: 7, t: 'f', q: 'No Cap 7:32, Paulo quer que estejamos livres de preocupações. O solteiro cuida das coisas do Senhor, mas o casado cuida das coisas do _______, de como agradar à esposa.', k: ['mundo'], a: 'mundo' }
+    ];
+
+    // Temas por capítulo para o Diagnóstico
+    const chapThemes = {
+        1: "Divisões e Sabedoria da Cruz",
+        2: "Revelação pelo Espírito",
+        3: "Carnalidade e Edifício de Deus",
+        4: "O Ministério Apostólico",
+        5: "Imoralidade e Disciplina",
+        6: "Litígios e Pureza Corporal",
+        7: "Casamento e Celibato",
+        8: "Liberdade Cristã (Alimentos sacrificados)",
+        9: "Direitos e Renúncias de Paulo",
+        10: "Lições da História de Israel e Idolatria",
+        11: "Ordem no Culto e Ceia do Senhor",
+        12: "Dons Espirituais e o Corpo",
+        13: "A Supremacia do Amor",
+        14: "Profecia, Línguas e Ordem no Culto",
+        15: "A Ressurreição",
+        16: "Ofertas e Recomendações Finais"
+    };
+
+    // --- VARIÁVEIS DE ESTADO ---
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let userAnswersInfo = []; // guarda { qIndex, isCorrect, userAnswerText, expectedText, chapter }
+
+    // --- FUNÇÕES DE LÓGICA ---
+    function normalizeStr(str) {
+        if (!str) return '';
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
+
+    function shuffleArray(array) {
+        let arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function startQuiz(level) {
+        const filtered = dbQuestions.filter(q => q.l === level);
+        currentQuestions = shuffleArray(filtered).slice(0, 20); // Garantir as 20
+        currentIndex = 0;
+        score = 0;
+        userAnswersInfo = [];
+
+        document.getElementById('screen-menu').classList.remove('active');
+        document.getElementById('screen-quiz').classList.add('active');
+        document.getElementById('level-indicator').innerText = `Nível ${level}`;
+        
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const qObj = currentQuestions[currentIndex];
+        document.getElementById('progress-text').innerText = `Pergunta ${currentIndex + 1} de ${currentQuestions.length}`;
+        const pct = ((currentIndex) / currentQuestions.length) * 100;
+        document.getElementById('progress-bar-fill').style.width = pct + '%';
+
+        const container = document.getElementById('question-container');
+        let html = `<div class="question-text">${qObj.q}</div>`;
+
+        if (qObj.t === 'm') {
+            html += `<div class="options-container">`;
+            qObj.o.forEach((opt, idx) => {
+                html += `
+                <label class="option-label">
+                    <input type="radio" name="optRadio" value="${idx}" onchange="checkInputState()">
+                    ${opt}
+                </label>`;
+            });
+            html += `</div>`;
+        } else if (qObj.t === 'f') {
+            html += `<input type="text" id="ansText" class="input-text" placeholder="Digite a palavra que completa a frase..." oninput="checkInputState()">`;
+        } else if (qObj.t === 'd') {
+            html += `<textarea id="ansText" class="input-text" placeholder="Digite sua resposta descritiva..." oninput="checkInputState()"></textarea>`;
+        }
+
+        container.innerHTML = html;
+        document.getElementById('btn-next').disabled = true;
+    }
+
+    function checkInputState() {
+        const qObj = currentQuestions[currentIndex];
+        let hasValue = false;
+        if (qObj.t === 'm') {
+            const radios = document.getElementsByName('optRadio');
+            hasValue = Array.from(radios).some(r => r.checked);
+        } else {
+            hasValue = document.getElementById('ansText').value.trim() !== '';
+        }
+        document.getElementById('btn-next').disabled = !hasValue;
+    }
+
+    function nextQuestion() {
+        const qObj = currentQuestions[currentIndex];
+        let isCorrect = false;
+        let userText = "";
+        let expectedText = "";
+
+        if (qObj.t === 'm') {
+            const radios = document.getElementsByName('optRadio');
+            let selectedIdx = -1;
+            radios.forEach(r => { if(r.checked) selectedIdx = parseInt(r.value); });
+            isCorrect = (selectedIdx === qObj.a);
+            userText = selectedIdx >= 0 ? qObj.o[selectedIdx] : "Não respondido";
+            expectedText = qObj.o[qObj.a];
+        } else {
+            userText = document.getElementById('ansText').value.trim();
+            const normUser = normalizeStr(userText);
+            // Verifica se pelo menos uma palavra chave está presente
+            isCorrect = qObj.k.some(keyword => normUser.includes(normalizeStr(keyword)));
+            expectedText = qObj.a; // Gabarito
+        }
+
+        if (isCorrect) score++;
+
+        userAnswersInfo.push({
+            q: qObj.q,
+            isCorrect: isCorrect,
+            userText: userText,
+            expectedText: expectedText,
+            chapter: qObj.c
+        });
+
+        currentIndex++;
+        if (currentIndex < currentQuestions.length) {
+            renderQuestion();
+        } else {
+            finishQuiz();
+        }
+    }
+
+    function finishQuiz() {
+        document.getElementById('screen-quiz').classList.remove('active');
+        document.getElementById('screen-results').classList.add('active');
+
+        // Pontuação
+        const pct = Math.round((score / currentQuestions.length) * 100);
+        document.getElementById('score-display').innerText = `${pct}%`;
+        document.getElementById('score-text').innerText = `Você acertou ${score} de ${currentQuestions.length} questões.`;
+
+        // Diagnóstico
+        let wrongChapters = userAnswersInfo.filter(u => !u.isCorrect).map(u => u.chapter);
+        let diagText = "";
+        
+        if (wrongChapters.length === 0) {
+            diagText = "Incrível! Você acertou todas as questões. Seu domínio bíblico está perfeitamente afiado para este nível.";
+        } else {
+            // Contar frequencia de erros por capítulo
+            let freq = {};
+            wrongChapters.forEach(c => freq[c] = (freq[c] || 0) + 1);
+            
+            // Achar o capítulo com mais erros
+            let maxErr = 0;
+            let worstChap = null;
+            for (const [ch, count] of Object.entries(freq)) {
+                if (count > maxErr) { maxErr = count; worstChap = ch; }
+            }
+
+            diagText = `Análise de Desempenho: Notamos que você demonstrou fraqueza principal no <strong>Capítulo ${worstChap} (${chapThemes[worstChap]})</strong>, errando ${maxErr} questão(ões) ligada(s) a ele. Recomendamos revisar este texto e sua doutrina central antes da competição!`;
+        }
+        document.getElementById('diagnostic-text').innerHTML = diagText;
+
+        // Lista de Revisão
+        const revContainer = document.getElementById('review-list');
+        revContainer.innerHTML = '';
+        userAnswersInfo.forEach((ans, i) => {
+            const div = document.createElement('div');
+            div.className = `review-item ${ans.isCorrect ? 'correct' : 'wrong'}`;
+            div.innerHTML = `
+                <div class="review-q">${i+1}. [Cap. ${ans.chapter}] ${ans.q}</div>
+                <div class="review-a">
+                    ${!ans.isCorrect ? `<strong>Sua resposta:</strong> ${ans.userText}<br>` : ''}
+                    <strong>Resposta Correta:</strong> ${ans.expectedText}
+                </div>
+            `;
+            revContainer.appendChild(div);
+        });
+    }
+
+    function restartMenu() {
+        document.getElementById('screen-results').classList.remove('active');
+        document.getElementById('screen-menu').classList.add('active');
+    }
+</script>
+
+</body>
+</html>
